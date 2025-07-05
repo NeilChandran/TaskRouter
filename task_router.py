@@ -275,3 +275,24 @@ def reset_system():
     logging.info("System reset complete.")
     return jsonify({"status": "System reset."}), 200
 
+
+@app.route('/task/<task_id>', methods=['GET'])
+def get_task_by_id(task_id):
+    task = scheduler.task_registry.get(task_id)
+    if task:
+        return jsonify(task), 200
+    return jsonify({"error": "Task not found."}), 404
+
+@app.route('/pause', methods=['POST'])
+def pause_workers():
+    for worker in scheduler.workers:
+        worker.active = False
+    return jsonify({"status": "All workers paused."}), 200
+
+@app.route('/resume', methods=['POST'])
+def resume_workers():
+    for worker in scheduler.workers:
+        worker.active = True
+    return jsonify({"status": "All workers resumed."}), 200
+
+
