@@ -1,21 +1,27 @@
-# TaskRouter
+#🌐 TaskRouter Dashboard (HTML Platform)
 
-TaskRouter is a Python-based microservice that simulates a scalable backend system for managing and dispatching tasks using multithreaded workers and queueing strategies (priority-based or FIFO). Designed for demonstrating backend system architecture, concurrency, and Flask-based API development — ideal for aspiring software engineering interns.
+The TaskRouter Dashboard is a full-featured HTML+JavaScript interface that interacts with a backend task management system. It provides real-time visibility, diagnostics, and control over tasks submitted to a Python-based TaskRouter API.
 
-🚀 Features
-✅ Multithreaded worker pool to process tasks concurrently
+This project is perfect for demonstrating frontend-backend integration, live API interfacing, and data-driven UI design — ideal for software engineering internship candidates.
 
-📋 Priority-based or FIFO task scheduling
+🧰 Key Features
+✅ Clean and responsive HTML/CSS interface
 
-🔄 Task history tracking (completed & failed)
+📡 Real-time data fetching from RESTful Flask API
 
-🌐 RESTful API built with Flask
+🧪 Developer tools to test custom API endpoints
 
-📊 Real-time system stats (queue size, worker count)
+📋 Create, submit, and manage tasks through forms
 
-🧪 Testing utilities for rapid prototyping
+🔎 Task lookup by ID and full task history viewer
 
-💡 Graceful shutdown with atexit and signal handling
+📊 Built-in analytics: task count, durations, priority stats
 
-🆔 UUID task identifiers for unique tracking
+🛠️ Worker control: pause/resume system from UI
+
+⏱️ Live feed toggle to monitor new tasks
+
+📁 Export task data to CSV or download logs
+
+🧼 Output log viewer and cleaner
 
