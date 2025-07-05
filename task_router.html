@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskRouter Extended Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    button, input, select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    #output {
+      white-space: pre-wrap;
+      background-color: #f0f0f0;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+    }
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TaskRouter Extended Dashboard</h1>
+
+    <div class="section">
+      <h3>Create New Task</h3>
+      <input id="task-desc" placeholder="Task Description" />
+      <input id="task-duration" type="number" placeholder="Duration (sec)" />
+      <input id="task-priority" type="number" placeholder="Priority (1-10)" />
+      <button onclick="createTask()">Submit Task</button>
+    </div>
+
+    <div class="section">
+      <h3>Task History & Lookup</h3>
+      <button onclick="fetchHistory()">View All Tasks</button>
+      <input id="task-id" placeholder="Enter Task ID" />
+      <button onclick="lookupTask()">Find Task by ID</button>
+    </div>
+
+    <div class="section">
+      <h3>Worker Controls</h3>
+      <button onclick="pauseWorkers()">Pause Workers</button>
+      <button onclick="resumeWorkers()">Resume Workers</button>
+      <button onclick="restartSystem()">Restart System</button>
+    </div>
+
+    <div class="section">
+      <h3>Analytics</h3>
+      <button onclick="getTaskCount()">Task Count</button>
+      <button onclick="getAvgDuration()">Average Duration</button>
+      <button onclick="getPriorityStats()">Priority Breakdown</button>
+    </div>
+
+    <div class="section">
+      <h3>Export / Logs</h3>
+      <button onclick="downloadCSV()">Download Tasks CSV</button>
+      <button onclick="downloadLogs()">Download Log File</button>
+    </div>
+
+    <div class="section">
+      <h3>Live Feed</h3>
+      <button onclick="startLiveFeed()">Start Live Feed</button>
+      <button onclick="stopLiveFeed()">Stop Live Feed</button>
+    </div>
+
+    <div class="section">
+      <h3>Developer Tools</h3>
+      <input id="api-endpoint" placeholder="Endpoint (e.g., /status)" />
+      <button onclick="queryAPI()">Query Endpoint</button>
+      <textarea id="json-body" placeholder="Optional JSON Body"></textarea>
+    </div>
+
+    <div class="section">
+      <h3>Debug & Maintenance</h3>
+      <button onclick="runDiagnostics()">Run Diagnostics</button>
+      <button onclick="clearAll()">Clear All Tasks</button>
+    </div>
+
+    <div class="section">
+      <h3>Output</h3>
+      <button onclick="clearOutput()">Clear Output</button>
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:5000';
+    let intervalId = null;
+
+    function showOutput(data) {
+      document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+    }
+
+    function clearOutput() {
+      document.getElementById('output').innerText = '';
+    }
+
+    function createTask() {
+      const desc = document.getElementById('task-desc').value;
+      const duration = document.getElementById('task-duration').value;
+      const priority = document.getElementById('task-priority').value;
+      fetch(`${API}/submit`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ description: desc, duration: +duration, priority: +priority })
+      })
+      .then(res => res.json())
+      .then(showOutput);
+    }
+
+    function fetchHistory() {
+      fetch(`${API}/history/all`)
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function lookupTask() {
+      const id = document.getElementById('task-id').value;
+      fetch(`${API}/task/${id}`)
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function pauseWorkers() {
+      fetch(`${API}/pause`, { method: 'POST' })
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function resumeWorkers() {
+      fetch(`${API}/resume`, { method: 'POST' })
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function restartSystem() {
+      fetch(`${API}/reset`, { method: 'POST' })
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function getTaskCount() {
+      fetch(`${API}/tasks/count`)
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function getAvgDuration() {
+      fetch(`${API}/tasks/average-duration`)
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function getPriorityStats() {
+      fetch(`${API}/tasks/priority-distribution`)
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function downloadCSV() {
+      fetch(`${API}/tasks/export`)
+        .then(res => res.blob())
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'tasks.csv';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        });
+    }
+
+    function downloadLogs() {
+      fetch(`${API}/logs/download`)
+        .then(res => res.blob())
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'logs.txt';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        });
+    }
+
+    function startLiveFeed() {
+      intervalId = setInterval(() => {
+        fetch(`${API}/tasks/recent`)
+          .then(res => res.json())
+          .then(data => {
+            const div = document.getElementById('output');
+            div.innerText = `[Live ${new Date().toLocaleTimeString()}]\n` + JSON.stringify(data, null, 2);
+          });
+      }, 4000);
+    }
+
+    function stopLiveFeed() {
+      clearInterval(intervalId);
+    }
+
+    function queryAPI() {
+      const endpoint = document.getElementById('api-endpoint').value;
+      const body = document.getElementById('json-body').value;
+      const config = {
+        method: body ? 'POST' : 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      };
+      if (body) config.body = body;
+
+      fetch(`${API}${endpoint}`, config)
+        .then(res => res.json())
+        .then(showOutput)
+        .catch(e => showOutput({ error: 'Invalid request', detail: e.message }));
+    }
+
+    function runDiagnostics() {
+      fetch(`${API}/system/diagnostics`)
+        .then(res => res.json())
+        .then(showOutput);
+    }
+
+    function clearAll() {
+      fetch(`${API}/tasks/clear`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(showOutput);
+    }
+  </script>
+</body>
+</html>
+
