@@ -253,3 +253,25 @@ if __name__ == '__main__':
         app.run(port=5000, debug=False)
     except KeyboardInterrupt:
         graceful_shutdown()
+@app.route('/metrics', methods=['GET'])
+def get_metrics():
+    metrics = {
+        "total_tasks": len(history.completed_tasks) + len(history.failed_tasks) + len(history.cancelled_tasks),
+        "completed": len(history.completed_tasks),
+        "failed": len(history.failed_tasks),
+        "cancelled": len(history.cancelled_tasks),
+        "active_workers": scheduler.active_workers(),
+        "queue_size": scheduler.queue_size(),
+    }
+    return jsonify(metrics), 200
+
+@app.route('/reset', methods=['POST'])
+def reset_system():
+    history.completed_tasks.clear()
+    history.failed_tasks.clear()
+    history.cancelled_tasks.clear()
+    history.execution_log.clear()
+    history.timestamps.clear()
+    logging.info("System reset complete.")
+    return jsonify({"status": "System reset."}), 200
+
